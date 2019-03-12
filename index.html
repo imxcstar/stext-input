@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://cdn.bootcss.com/vue/2.6.8/vue.min.js"></script>
+    <title>序列号框框Demo</title>
+    <style>
+        .ITextDefault {
+            border: 1px solid;
+            border-color: #b5b3b3;
+            border-radius: 5px;
+            float: left;
+            width: 25px;
+            height: 28px;
+            text-align: center;
+            padding-top: 4px;
+            margin-right: 3px;
+
+            -moz-user-select: -moz-none;
+            -khtml-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+
+            text-decoration: none;
+            -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+            -webkit-user-select: none;
+            -moz-user-focus: none;
+            -moz-user-select: none;
+
+            color: #000000;
+        }
+
+        .ITextDefaultCheck {
+            border-color: #75aad0;
+        }
+
+        .ITextDefaultHas {
+            border-color: #5deb0b;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="margin-left: 30%;margin-top: 10%">
+        <div style="margin-right: 30%;margin-bottom: 30px; font-size: 30px;font-weight: bold">
+            序列号框框Demo：
+            <span id="test_over">{{over_value}}</span>
+        </div>
+        <div id="content" style="float: left;">
+            <a v-for="i in maxlength" ref="item" v-on:click="item_click(i)"
+                :class="{ITextDefault : true, ITextDefaultHas: (value.substring(i-1,i)!=' ' && select_index!=i), ITextDefaultCheck: (select_index==i)}"
+                href="javascript:void(0)" v-on:blur="oblur()" v-on:keyup="okey($event)">
+                {{value.substring(i-1,i)}}
+            </a>
+        </div>
+        <div style="float: left;margin-left: 10px;margin-right: 10px;padding-top: 5px">
+            -
+        </div>
+        <div id="content2" style="float: left;">
+            <a v-for="i in maxlength" ref="item" v-on:click="item_click(i)"
+                :class="{ITextDefault : true, ITextDefaultHas: (value.substring(i-1,i)!=' ' && select_index!=i), ITextDefaultCheck: (select_index==i)}"
+                href="javascript:void(0)" v-on:blur="oblur()" v-on:keyup="okey($event)">
+                {{value.substring(i-1,i)}}
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function InitSText(el, length) {
+            return new Vue({
+                el: el,
+                data: {
+                    maxlength: length,
+                    select_index: -1,
+                    value: '',
+                    up_obj: null,
+                    next_obj: null,
+                    input_fun: null
+                },
+                methods: {
+                    get_not_null_value: function () {
+                        return this.value.replace(/\s+/g, '');
+                    },
+                    is_has_null: function () {
+                        return !(this.value.indexOf(' ') == -1);
+                    },
+                    item_click: function (index) {
+                        this.move(index);
+                    },
+                    okey: function (ev) {
+                        if (this.select_index == -1) {
+                            return;
+                        }
+
+                        var tkcode = ev.keyCode;
+                        if (tkcode >= 48 && tkcode <= 57) {
+                            this.value = this.replacePos(this.value, this.select_index, ev.key);
+                            if (this.select_index + 1 <= this.maxlength) {
+                                this.move(this.select_index + 1);
+                            } else {
+                                this.move(-1);
+                                if (this.next_obj != null) {
+                                    this.next_obj.move_start(true);
+                                }
+                            }
+                        } else if (tkcode == 8) {
+                            this.value = this.replacePos(this.value, this.select_index, ' ');
+                            if (this.select_index - 1 >= 1) {
+                                var tvalue = this.value;
+                                var tw = -1;
+                                for (let i = 1; i < this.select_index; i++) {
+                                    if (tvalue.substring(i - 1, i) != ' ') {
+                                        tw = i;
+                                    }
+                                }
+                                this.move(tw);
+                                if (tw == -1) {
+                                    if (this.up_obj != null) {
+                                        this.up_obj.move_not_null_end(true);
+                                    }
+                                }
+                            } else {
+                                this.move(-1);
+                                if (this.up_obj != null) {
+                                    this.up_obj.move_not_null_end(true);
+                                }
+                            }
+                        }
+
+                        if (this.input_fun != null) {
+                            this.input_fun();
+                        }
+                    },
+                    oblur: function () {
+                        this.move(-1);
+                    },
+                    GF: function (length) {
+                        return (Array(length + 1).join(' '));
+                    },
+                    replacePos: function (strObj, pos, replacetext) {
+                        return strObj.substr(0, pos - 1) + replacetext + strObj.substring(pos, strObj.length);
+                    },
+                    move: function (w, is_set_focus = false) {
+                        this.select_index = w;
+                        if (w >= 1 && w <= this.maxlength && is_set_focus == true) {
+                            this.$refs.item[w - 1].focus();
+                        }
+                    },
+                    move_start: function (is_set_focus = false) {
+                        this.move(1, is_set_focus);
+                    },
+                    move_end: function (is_set_focus = false) {
+                        this.move(this.maxlength, is_set_focus);
+                    },
+                    move_not_null_end: function (is_set_focus = false) {
+                        var tw = -1;
+                        var tvalue = this.value;
+                        for (let i = 1; i <= tvalue.length; i++) {
+                            if (tvalue.substring(i - 1, i) != ' ') {
+                                tw = i;
+                            }
+                        }
+                        this.move(tw, is_set_focus);
+                    }
+                },
+                mounted: function () {
+                    this.value = this.GF(this.maxlength);
+                }
+            });
+        }
+
+        var IContent = InitSText('#content', 11);
+        var IContent2 = InitSText('#content2', 4);
+        IContent.next_obj = IContent2;
+        IContent2.up_obj = IContent;
+
+
+        var test_over = new Vue({
+            el: '#test_over',
+            data: {
+                over_value: ''
+            },
+        });
+
+        IContent.input_fun = function () {
+            test_over.over_value = '(' + !(IContent.is_has_null() || IContent2.is_has_null()) + ')' + IContent.get_not_null_value() + '-' + IContent2.get_not_null_value()
+        }
+
+        IContent2.input_fun = IContent.input_fun;
+
+    </script>
+</body>
+
+</html>
