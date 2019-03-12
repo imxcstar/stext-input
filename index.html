@@ -41,73 +41,121 @@
         .ITextDefaultHas {
             border-color: #5deb0b;
         }
+
+        .STextInputB {
+            background: rgba(255, 255, 255, 0);
+            background-color: rgba(255, 255, 255, 0);
+            border-color: rgba(255, 255, 255, 0);
+            color: rgba(255, 255, 255, 0);
+            outline: none;
+            width: 1px;
+            max-width: 1px;
+            height: 1px;
+            max-width: 1px;
+        }
+
+        .STextInputB::selection {
+            background: rgba(255, 255, 255, 0);
+        }
+
+        .STextInputB::-moz-selection {
+            background: rgba(255, 255, 255, 0);
+        }
     </style>
 </head>
 
 <body>
-    <div style="margin-left: 30%;margin-top: 10%">
-        <div style="margin-right: 30%;margin-bottom: 30px; font-size: 30px;font-weight: bold">
-            序列号框框Demo：
-            <span id="test_over">{{over_value}}</span>
+    <div class="v-code">
+        <div style="margin-left: 30%;margin-top: 10%">
+            <div style="margin-right: 30%;margin-bottom: 30px; font-size: 30px;font-weight: bold">
+                序列号框框Demo：textInput
+                <span id="test_over">{{over_value}}</span>
+            </div>
+            <div id="content" style="float: left;">
+                <input class="STextInputB" ref="input_value" type="text" :maxlength="1" v-on:keyup="okey($event)"
+                    v-on:keyup.delete="del_key()" v-on:blur="oblur()" value=" ">
+                <a v-for="i in maxlength" ref="item" v-on:click="item_click(i)"
+                    :class="{ITextDefault : true, ITextDefaultHas: (value.substring(i-1,i)!=' ' && value.substring(i-1,i)!='' && select_index!=i), ITextDefaultCheck: (select_index==i)}"
+                    href="javascript:void(0)">
+                    {{value.substring(i-1,i)}}
+                </a>
+            </div>
+            <div style="float: left;margin-left: 10px;margin-right: 10px;padding-top: 5px">
+                -
+            </div>
+            <div id="content2" style="float: left;">
+                <input class="STextInputB" ref="input_value" type="text" :maxlength="1" v-on:keyup="okey($event)"
+                    v-on:keyup.delete="del_key()" v-on:blur="oblur()" value=" ">
+                <a v-for="i in maxlength" ref="item" v-on:click="item_click(i)"
+                    :class="{ITextDefault : true, ITextDefaultHas: (value.substring(i-1,i)!=' ' && value.substring(i-1,i)!='' && select_index!=i), ITextDefaultCheck: (select_index==i)}"
+                    href="javascript:void(0)">
+                    {{value.substring(i-1,i)}}
+                </a>
+            </div>
         </div>
-        <div id="content" style="float: left;">
-            <a v-for="i in maxlength" ref="item" v-on:click="item_click(i)"
-                :class="{ITextDefault : true, ITextDefaultHas: (value.substring(i-1,i)!=' ' && select_index!=i), ITextDefaultCheck: (select_index==i)}"
-                href="javascript:void(0)" v-on:blur="oblur()" v-on:keyup="okey($event)">
-                {{value.substring(i-1,i)}}
-            </a>
-        </div>
-        <div style="float: left;margin-left: 10px;margin-right: 10px;padding-top: 5px">
-            -
-        </div>
-        <div id="content2" style="float: left;">
-            <a v-for="i in maxlength" ref="item" v-on:click="item_click(i)"
-                :class="{ITextDefault : true, ITextDefaultHas: (value.substring(i-1,i)!=' ' && select_index!=i), ITextDefaultCheck: (select_index==i)}"
-                href="javascript:void(0)" v-on:blur="oblur()" v-on:keyup="okey($event)">
-                {{value.substring(i-1,i)}}
-            </a>
-        </div>
-    </div>
 
-    <script>
-        function InitSText(el, length) {
-            return new Vue({
-                el: el,
-                data: {
-                    maxlength: length,
-                    select_index: -1,
-                    value: '',
-                    up_obj: null,
-                    next_obj: null,
-                    input_fun: null
-                },
-                methods: {
-                    get_not_null_value: function () {
-                        return this.value.replace(/\s+/g, '');
+        <script>
+            function InitSText(el, length) {
+                return new Vue({
+                    el: el,
+                    data: {
+                        maxlength: length,
+                        select_index: -1,
+                        value: '',
+                        up_obj: null,
+                        next_obj: null,
+                        input_fun: null
                     },
-                    is_has_null: function () {
-                        return !(this.value.indexOf(' ') == -1);
-                    },
-                    item_click: function (index) {
-                        this.move(index);
-                    },
-                    okey: function (ev) {
-                        if (this.select_index == -1) {
-                            return;
-                        }
+                    methods: {
+                        get_not_null_value: function () {
+                            return this.value.replace(/\s+/g, '');
+                        },
+                        is_has_null: function () {
+                            return !(this.value.indexOf(' ') == -1);
+                        },
+                        item_click: function (index) {
+                            this.$refs.input_value.focus();
+                            this.$refs.input_value.selectionStart = 0;
+                            this.$refs.input_value.selectionEnd = 1;
+                            this.move(index);
+                        },
+                        okey: function (ev) {
+                            var tival = this.$refs.input_value.value;
+                            if (this.select_index == -1 || tival == ' ') {
+                                return;
+                            }
 
-                        var tkcode = ev.keyCode;
-                        if (tkcode >= 48 && tkcode <= 57) {
-                            this.value = this.replacePos(this.value, this.select_index, ev.key);
-                            if (this.select_index + 1 <= this.maxlength) {
-                                this.move(this.select_index + 1);
-                            } else {
-                                this.move(-1);
-                                if (this.next_obj != null) {
-                                    this.next_obj.move_start(true);
+                            var tkcode = tival.charCodeAt();
+                            if (tival.length == 0) {
+                                this.$refs.input_value.value = ' ';
+                                this.$refs.input_value.selectionStart = 0;
+                                this.$refs.input_value.selectionEnd = 1;
+                                return;
+                            }
+                            this.$refs.input_value.selectionStart = 0;
+                            this.$refs.input_value.selectionEnd = 1;
+
+                            if (tkcode >= 48 && tkcode <= 57) {
+                                this.value = this.replacePos(this.value, this.select_index, tival);
+                                if (this.select_index + 1 <= this.maxlength) {
+                                    this.move(this.select_index + 1);
+                                } else {
+                                    this.move(-1);
+                                    if (this.next_obj != null) {
+                                        this.next_obj.move_start(true);
+                                    }
                                 }
                             }
-                        } else if (tkcode == 8) {
+
+                            if (this.input_fun != null) {
+                                this.input_fun();
+                            }
+                        },
+                        del_key: function () {
+                            this.$refs.input_value.value = ' ';
+                            this.$refs.input_value.selectionStart = 0;
+                            this.$refs.input_value.selectionEnd = 1;
+                            console.log(this.select_index);
                             this.value = this.replacePos(this.value, this.select_index, ' ');
                             if (this.select_index - 1 >= 1) {
                                 var tvalue = this.value;
@@ -129,70 +177,75 @@
                                     this.up_obj.move_not_null_end(true);
                                 }
                             }
-                        }
 
-                        if (this.input_fun != null) {
-                            this.input_fun();
-                        }
-                    },
-                    oblur: function () {
-                        this.move(-1);
-                    },
-                    GF: function (length) {
-                        return (Array(length + 1).join(' '));
-                    },
-                    replacePos: function (strObj, pos, replacetext) {
-                        return strObj.substr(0, pos - 1) + replacetext + strObj.substring(pos, strObj.length);
-                    },
-                    move: function (w, is_set_focus = false) {
-                        this.select_index = w;
-                        if (w >= 1 && w <= this.maxlength && is_set_focus == true) {
-                            this.$refs.item[w - 1].focus();
-                        }
-                    },
-                    move_start: function (is_set_focus = false) {
-                        this.move(1, is_set_focus);
-                    },
-                    move_end: function (is_set_focus = false) {
-                        this.move(this.maxlength, is_set_focus);
-                    },
-                    move_not_null_end: function (is_set_focus = false) {
-                        var tw = -1;
-                        var tvalue = this.value;
-                        for (let i = 1; i <= tvalue.length; i++) {
-                            if (tvalue.substring(i - 1, i) != ' ') {
-                                tw = i;
+                            if (this.input_fun != null) {
+                                this.input_fun();
                             }
+                        },
+                        oblur: function () {
+                            this.move(-1);
+                        },
+                        GF: function (length) {
+                            return (Array(length + 1).join(' '));
+                        },
+                        replacePos: function (strObj, pos, replacetext) {
+                            return strObj.substr(0, pos - 1) + replacetext + strObj.substring(pos, strObj.length);
+                        },
+                        move: function (w, is_set_focus = false) {
+                            this.select_index = w;
+                            if (is_set_focus == true) {
+                                this.$refs.input_value.focus();
+                                this.$refs.input_value.selectionStart = 0;
+                                this.$refs.input_value.selectionEnd = 1;
+                            } else {
+                                if (w == -1) {
+                                    this.$refs.input_value.blur();
+                                }
+                            }
+                        },
+                        move_start: function (is_set_focus = false) {
+                            this.move(1, is_set_focus);
+                        },
+                        move_end: function (is_set_focus = false) {
+                            this.move(this.maxlength, is_set_focus);
+                        },
+                        move_not_null_end: function (is_set_focus = false) {
+                            var tw = -1;
+                            var tvalue = this.value;
+                            for (let i = 1; i <= tvalue.length; i++) {
+                                if (tvalue.substring(i - 1, i) != ' ') {
+                                    tw = i;
+                                }
+                            }
+                            this.move(tw, is_set_focus);
                         }
-                        this.move(tw, is_set_focus);
+                    },
+                    mounted: function () {
+                        this.value = this.GF(this.maxlength);
                     }
+                });
+            }
+
+            var IContent = InitSText('#content', 11);
+            var IContent2 = InitSText('#content2', 4);
+            IContent.next_obj = IContent2;
+            IContent2.up_obj = IContent;
+
+
+            var test_over = new Vue({
+                el: '#test_over',
+                data: {
+                    over_value: ''
                 },
-                mounted: function () {
-                    this.value = this.GF(this.maxlength);
-                }
             });
-        }
 
-        var IContent = InitSText('#content', 11);
-        var IContent2 = InitSText('#content2', 4);
-        IContent.next_obj = IContent2;
-        IContent2.up_obj = IContent;
+            IContent.input_fun = function () {
+                test_over.over_value = '(' + !(IContent.is_has_null() || IContent2.is_has_null()) + ')' + IContent.get_not_null_value() + '-' + IContent2.get_not_null_value()
+            }
 
+            IContent2.input_fun = IContent.input_fun;
 
-        var test_over = new Vue({
-            el: '#test_over',
-            data: {
-                over_value: ''
-            },
-        });
-
-        IContent.input_fun = function () {
-            test_over.over_value = '(' + !(IContent.is_has_null() || IContent2.is_has_null()) + ')' + IContent.get_not_null_value() + '-' + IContent2.get_not_null_value()
-        }
-
-        IContent2.input_fun = IContent.input_fun;
-
-    </script>
+        </script>
 </body>
 
 </html>
